@@ -1,0 +1,37 @@
+{
+    "name": "magento/magento-russia-project",
+    "description": "Magento",
+    "require": {
+        "zendframework/zend-http": "2.*",
+        "zendframework/zend-crypt": "2.*",
+        "oggettoweb/ajax": "1.*",
+        "ecomdev/ecomdev_phpunit": "*"
+    },
+    "require-dev": {
+        "oggettoweb/coding_standard": "*",
+        "squizlabs/php_codesniffer": "1.*",
+        "zendframework/zftool":"dev-master",
+        "ecomdev/ecomdev_phpunit": "*"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/google/google-api-php-client"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/OggettoWeb/Oggetto-Coding-Standard"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/OggettoWeb/ajax"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/EcomDev/EcomDev_PHPUnit"
+        }
+    ],
+    "extra": {
+        "magento-root-dir": "."
+    }
+}

@@ -1,0 +1,126 @@
+# Magento config
+project::magento::unit_db: "%{hiera('project::db::unit_db')}"
+project::magento::unit_db_user: "%{hiera('project::db::unit_db_user')}"
+project::magento::unit_db_pass: "%{hiera('project::db::unit_db_pass')}"
+project::magento::mage_db: "%{hiera('project::db::mage_db')}"
+project::magento::mage_db_user: "%{hiera('project::db::mage_db_user')}"
+project::magento::mage_db_pass: "%{hiera('project::db::mage_db_pass')}"
+
+
+# Magento installation config
+project::magento::install::mage_root: "%{hiera('project::magento::root')}"
+project::magento::install::mage_db: "%{hiera('project::db::mage_db')}"
+project::magento::install::mage_db_user: "%{hiera('project::db::mage_db_user')}"
+project::magento::install::mage_db_pass: "%{hiera('project::db::mage_db_pass')}"
+project::magento::install::unsecure_base_url: "%{hiera('project::magento::unsecure_base_url')}"
+project::magento::install::secure_base_url: "%{hiera('project::magento::secure_base_url')}"
+project::magento::install::enc_key: "%{hiera('project::magento::enc_key')}"
+
+
+# Resources config
+project::resources::db::mage_root: "%{hiera('project::magento::root')}"
+project::resources::db::mage_db: "%{hiera('project::db::mage_db')}"
+project::resources::db::mage_unsecure_url: "%{hiera('project::magento::unsecure_base_url')}"
+project::resources::db::mage_secure_url: "%{hiera('project::magento::secure_base_url')}"
+project::resources::media::mage_root: "%{hiera('project::magento::root')}"
+
+# PHPMyAdmin
+project::phpma::version: "4.2.5"
+project::phpma::web_user: "%{hiera('project::php::web_user')}"
+project::phpma::web_group: "%{hiera('project::php::web_group')}"
+
+### NGINX config
+nginx::nginx_vhosts:
+  "%{hiera('project::system::hostname')}":
+    ensure: present
+    www_root: "%{hiera('project::magento::root')}"
+    use_default_location: false
+    vhost_cfg_prepend:
+      root: "%{hiera('project::magento::root')}"
+  "phpma.%{hiera('project::system::hostname')}":
+    ensure: present
+    www_root: "%{hiera('project::phpma::root')}/phpMyAdmin-%{hiera('project::phpma::version')}-all-languages"
+    use_default_location: false
+    vhost_cfg_prepend:
+      root: "%{hiera('project::phpma::root')}/phpMyAdmin-%{hiera('project::phpma::version')}-all-languages"
+nginx::nginx_locations:
+  ### Magento NGINX config
+  "l0.%{hiera('project::system::hostname')}":
+    ensure: present
+    location: "/"
+    vhost: "%{hiera('project::system::hostname')}"
+    location_custom_cfg:
+      index: "index.html index.php"
+      try_files: "$uri $uri/ @handler"
+      expires: "30d"
+  "l1.%{hiera('project::system::hostname')}":
+    ensure: present
+    location: "~ ^/(app|includes|lib|media/downloadable|pkginfo|report/config.xml|var)/"
+    vhost: "%{hiera('project::system::hostname')}"
+    location_custom_cfg:
+      - internal
+  "l2.%{hiera('project::system::hostname')}":
+    ensure: present
+    location: "~ ^/_intellij_phpunit_launcher.php$"
+    vhost: "%{hiera('project::system::hostname')}"
+    fastcgi: "127.0.0.1:9000"
+    fastcgi_script: "$document_root/shell/_intellij_phpunit_launcher.php"
+    location_cfg_append:
+      expires: 'off'
+  "l3.%{hiera('project::system::hostname')}":
+    ensure: present
+    location: "@handler"
+    vhost: "%{hiera('project::system::hostname')}"
+    location_custom_cfg:
+      rewrite: "/ /index.php"
+  "l4.%{hiera('project::system::hostname')}":
+    ensure: present
+    location: "~* .php/"
+    vhost: "%{hiera('project::system::hostname')}"
+    location_custom_cfg:
+      rewrite: "^(.*.php)/ $1 last"
+  "l5.%{hiera('project::system::hostname')}":
+    ensure: present
+    location: "~* .php$"
+    vhost: "%{hiera('project::system::hostname')}"
+    fastcgi: "127.0.0.1:9000"
+    fastcgi_script: "$document_root$fastcgi_script_name"
+    location_cfg_prepend:
+      - "if (!-e $request_filename) { rewrite / /index.php last; } #"
+    location_cfg_append:
+      fastcgi_index: "index.php"
+      fastcgi_read_timeout: "3600"
+      expires: "off"
+      fastcgi_param:
+        - "MAGE_RUN_CODE default"
+        - "MAGE_RUN_TYPE store"
+
+  ### PHPMyAdmin NGINX config
+  "l0.phpma.%{hiera('project::system::hostname')}":
+    ensure: present
+    location: "/"
+    vhost: "phpma.%{hiera('project::system::hostname')}"
+    location_custom_cfg:
+      index: "index.html index.php"
+      try_files: "$uri $uri/ @handler"
+      expires: "30d"
+  "l1.phpma.%{hiera('project::system::hostname')}":
+    ensure: present
+    location: "~ /\\."
+    vhost: "phpma.%{hiera('project::system::hostname')}"
+    location_custom_cfg:
+      - internal
+  "l2.phpma.%{hiera('project::system::hostname')}":
+    ensure: present
+    location: "@handler"
+    vhost: "phpma.%{hiera('project::system::hostname')}"
+    location_custom_cfg:
+      rewrite: "/ /index.php"
+  "l3.phpma.%{hiera('project::system::hostname')}":
+    ensure: present
+    location: "~ \\.php$"
+    vhost: "phpma.%{hiera('project::system::hostname')}"
+    fastcgi: "127.0.0.1:9000"
+    fastcgi_script: "$document_root$fastcgi_script_name"
+    location_cfg_prepend:
+      - "if (!-e $request_filename) { rewrite / /index.php last; } #"
