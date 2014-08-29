@@ -47,33 +47,43 @@
 </div>
 <script>
     jQuery( document ).ready(function( $ ) {
-        $("#formDynamicFilter").submit(function(e)
-        {
-            var postData = $(this).serializeArray();
-            postData.push({'name': 'form_key', 'value': '<?php echo Mage::getSingleton('core/session')->getFormKey() ?>'});
-            var formURL = '<?php echo Mage::getUrl() . 'admin/df/filter/key/' .  Mage::getSingleton('adminhtml/url')->getSecretKey(); ?>/?isAjax=1';
-            $.ajax(
-                {
-                    url : formURL,
-                    type: "POST",
-                    data : postData,
-                    success:function(data, textStatus, jqXHR)
+<!--        $("#attrsearch").onEnter( function() {-->
+<!--            var formURL = '--><?php //echo Mage::getUrl() . 'admin/df/filter/key/' .  Mage::getSingleton('adminhtml/url')->getSecretKey(); ?><!--/?isAjax=1';-->
+<!--            $.ajax(-->
+<!--                {-->
+<!--                    url : formURL,-->
+<!--                    type: "POST",-->
+<!--                    data : 'dynamic_filter=' + $(this).val() + '&form_key=' + --><?php //echo Mage::getSingleton('core/session')->getFormKey() ?><!--,-->
+<!--                    success:function(data, textStatus, jqXHR)-->
+<!--                    {-->
+<!--                        productGridJsObject.doFilter()-->
+<!--                    }-->
+<!--                });-->
+<!--        });-->
+
+        var ac = $('#attrsearch').autocomplete({
+            serviceUrl: '<?php echo Mage::getUrl() . 'admin/df/search/key/' .  Mage::getSingleton('adminhtml/url')->getSecretKey(); ?>/?isAjax=1',
+            minChars: 2,
+            maxHeight: 400,
+            width: 300,
+            zIndex: 9999,
+            deferRequestBy: 0,
+            params: {form_key: '<?php echo Mage::getSingleton('core/session')->getFormKey() ?>'},
+            paramName: 'dynamic_filter',
+            type: 'POST',
+            onSelect: function(value, data) {
+                var formURL = '<?php echo Mage::getUrl() . 'admin/df/filter/key/' .  Mage::getSingleton('adminhtml/url')->getSecretKey(); ?>/?isAjax=1';
+                $.ajax(
                     {
-                        $(".th-container").html(data.content);
-                    },
-                    error: function(jqXHR, textStatus, errorThrown)
-                    {
-                        alert('fail');
-                    }
-                });
-            e.preventDefault(); //STOP default action
-            e.unbind(); //unbind. to stop multiple form submit.
+                        url : formURL,
+                        type: "POST",
+                        data : 'dynamic_filter=' + value.value + '&form_key=' + '<?php echo Mage::getSingleton('core/session')->getFormKey() ?>',
+                        success:function(data, textStatus, jqXHR)
+                        {
+                            productGridJsObject.doFilter()
+                        }
+                    });
+            }
         });
-//        $('#attrsearch').autocomplete({
-<!--            serviceUrl: '--><?php //echo Mage::getUrl() . 'admin/df/search/key/' .  Mage::getSingleton('adminhtml/url')->getSecretKey(); ?><!--/?isAjax=1',-->
-//            onSelect: function (suggestion) {
-//                alert('You selected: ' + suggestion.value + ', ' + suggestion.data);
-//            }
-//        });
     });
 </script>

@@ -1,0 +1,5 @@
+<!--<adminhtml_catalog_product_grid>-->
+    <!--<block type="core/text_list" name="root" output="toHtml">-->
+        <!--<block type="adminhtml/catalog_product_grid" name="admin.product.grid"/>-->
+    <!--</block>-->
+<!--</adminhtml_catalog_product_grid>-->

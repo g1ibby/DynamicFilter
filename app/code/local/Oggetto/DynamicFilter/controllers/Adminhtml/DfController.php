@@ -12,82 +12,59 @@
  * DISCLAIMER
  *
  * Do not edit or add to this file if you wish to upgrade
- * the Oggetto Module module to newer versions in the future.
- * If you wish to customize the module for your needs
+ * the Oggetto DynamicFilter module to newer versions in the future.
+ * If you wish to customize the module DynamicFilter for your needs
  * please refer to http://www.magentocommerce.com for more information.
  *
  * @category   Oggetto
- * @package    Oggetto_Module
+ * @package    Oggetto_DynamicFilter
  * @copyright  Copyright (C) 2014 Oggetto Web ltd (http://oggettoweb.com/)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
  
 /**
- * Enter some description...
+ * Controller for search attributes
  *
  * @category   Oggetto
- * @package    Oggetto_Module
- * @subpackage Model
+ * @package    Oggetto_DynamicFilter
+ * @subpackage Controller
  * @author     Sergei Waribrus <svaribrus@oggettoweb.com>
  */
 class Oggetto_DynamicFilter_Adminhtml_DfController extends Mage_Adminhtml_Controller_Action
 {
+    /**
+     * Search attribute
+     *
+     * @return void
+     */
     public function searchAction()
     {
-        $search = $this->getRequest()->getPost('search');
-        $attrib_data = array();
+        $response = Mage::getModel('ajax/response');
+        $search = $this->getRequest()->getParam('dynamic_filter');
         $attributes = Mage::getResourceModel('catalog/product_attribute_collection')->addVisibleFilter()
             ->addFieldToFilter('main_table.attribute_code', array('like' => "%$search%"))->getItems();
+        $attribData = $attributes->getColumnValues('attribute_code');
 
-        foreach ($attributes as $attribute) {
-            $attrib_data[$attribute->getAttributeCode()] = $attribute->getData();
-        }
-        var_dump($attrib_data);
-        die;
 
+        $response->success()->setQuery($search)
+            ->setSuggestions($attribData);
+        Mage::helper('ajax')->sendResponse($response);
     }
 
+    /**
+     * Choice attribute
+     *
+     * @return void
+     */
     public function filterAction()
     {
         $response = Mage::getModel('ajax/response');
 
-        $attributeId = $this->getRequest()->getPost('dynamic_filter');
-        if (!$attributeId) {
-            Mage::getSingleton('core/session')->unsetData('column');
-            $response->success()->setContent('Filter1');
-            Mage::helper('ajax')->sendResponse($response);
-            return;
+        if ($attributeId = $this->getRequest()->getPost('dynamic_filter')) {
+            Mage::getSingleton('core/session')->setData('index_column', $attributeId);
         }
-
-
-        $attribute = Mage::getResourceModel('catalog/product_attribute_collection')->addVisibleFilter()
-            ->addFieldToFilter('main_table.attribute_code', $attributeId)->getFirstItem();
-
-        $option = [];
-        foreach ($attribute->getSource()->getAllOptions() as $item) {
-            $option[$item['value']] = $item['label'];
-        }
-
-
-        $type = $attribute->getFrontendInput();
-
-        $grid = $this->getLayout()->createBlock('adminhtml/catalog_product_grid');
-        $data = array(
-            'header'  => Mage::helper('catalog')->__($attribute->getFrontendLabel()),
-            'width'   => '70px',
-            'index'   => $attribute->getAttributeCode(),
-            'type'    => $type,
-            'options' => $option,
-        );
-        $column = $this->getLayout()->createBlock('adminhtml/widget_grid_column')
-            ->setData($data)
-            ->setGrid($grid);
-        $column->setId($attribute->getAttributeCode());
-
-        $response->success()->setContent($column->getFilterHtml());
-
-        Mage::getSingleton('core/session')->setData('column', $data);
-
+        $response->success();
         Mage::helper('ajax')->sendResponse($response);
+        return;
     }
 }

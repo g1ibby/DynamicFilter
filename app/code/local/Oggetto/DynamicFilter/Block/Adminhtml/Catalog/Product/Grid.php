@@ -12,26 +12,31 @@
  * DISCLAIMER
  *
  * Do not edit or add to this file if you wish to upgrade
- * the Oggetto Module module to newer versions in the future.
- * If you wish to customize the module for your needs
+ * the Oggetto DynamicFilter module to newer versions in the future.
+ * If you wish to customize the DynamicFilter for your needs
  * please refer to http://www.magentocommerce.com for more information.
  *
  * @category   Oggetto
- * @package    Oggetto_Module
+ * @package    Oggetto_DynamicFilter
  * @copyright  Copyright (C) 2014 Oggetto Web ltd (http://oggettoweb.com/)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
  
 /**
- * Enter some description...
+ * Block grid products
  *
  * @category   Oggetto
- * @package    Oggetto_Module
- * @subpackage Model
+ * @package    Oggetto_DynamicFilter
+ * @subpackage Block
  * @author     Sergei Waribrus <svaribrus@oggettoweb.com>
  */
 class Oggetto_DynamicFilter_Block_Adminhtml_Catalog_Product_Grid extends Mage_Adminhtml_Block_Catalog_Product_Grid
 {
+    /**
+     * Prepare grid collection object
+     *
+     * @return Mage_Adminhtml_Block_Widget_Grid
+     */
     protected function _prepareCollection()
     {
         $store = $this->_getStore();
@@ -40,10 +45,9 @@ class Oggetto_DynamicFilter_Block_Adminhtml_Catalog_Product_Grid extends Mage_Ad
             ->addAttributeToSelect('name')
             ->addAttributeToSelect('attribute_set_id')
             ->addAttributeToSelect('type_id');
-//            ->addAttributeToSelect('color');
 
-        if ($data = Mage::getSingleton('core/session')->getData('column')) {
-            $collection->addAttributeToSelect($data['index']);
+        if ($index = Mage::getSingleton('core/session')->getData('index_column')) {
+            $collection->addAttributeToSelect($index);
         }
 
         if (Mage::helper('catalog')->isModuleEnabled('Mage_CatalogInventory')) {
@@ -112,30 +116,46 @@ class Oggetto_DynamicFilter_Block_Adminhtml_Catalog_Product_Grid extends Mage_Ad
         return $this;
     }
 
+    /**
+     * Prepare grid columns
+     *
+     * @return Mage_Adminhtml_Block_Widget_Grid
+     */
     protected function _prepareColumns()
     {
-        if ($data = Mage::getSingleton('core/session')->getData('column')) {
-            $column = $this->getLayout()->createBlock('adminhtml/widget_grid_column')
-                ->setData($data)
-                ->setGrid($this);
-            $column->setId($data['index']);
+        if ($filter = $this->getParam($this->getVarNameFilter(), null) == null) {
+            Mage::getSingleton('core/session')->unsetData('index_column');
+        }
 
-            $this->addColumnAfter($data['index'],
-                array(
-                    'header'  => Mage::helper('catalog')->__('Dynamic Filter'),
-                    'width'   => '70px',
-                    'type'    => 'dynamic',
-                    'index'   => $data['index'],
-                    'options' => $column
-                ), 'action');
+        if ($index = Mage::getSingleton('core/session')->getData('index_column')) {
+            $attribute = Mage::getResourceModel('catalog/product_attribute_collection')->addVisibleFilter()
+                ->addFieldToFilter('main_table.attribute_code', $index)->getFirstItem();
+
+            $option = [];
+            foreach ($attribute->getSource()->getAllOptions() as $item) {
+                if ($item['label'] == '') {
+                    continue;
+                }
+                $option[$item['value']] = $item['label'];
+            }
+
+            $data = array(
+                'header'  => Mage::helper('catalog')->__($attribute->getFrontendLabel()),
+                'width'   => '100px',
+                'index'   => $attribute->getAttributeCode(),
+                'type'    => $attribute->getFrontendInput(),
+                'options' => $option,
+            );
+            $this->addColumnAfter($index, $data, 'websites');
         } else {
             $this->addColumnAfter('dynamic_filter',
                 array(
                     'header'=> Mage::helper('catalog')->__('Dynamic Filter'),
-                    'width' => '70px',
+                    'width' => '100px',
                     'type'  => 'dynamic',
                     'index' => 'dynamic_filter',
-                ), 'action');
+                    'renderer'
+                ), 'websites');
         }
         return parent::_prepareColumns();
     }
