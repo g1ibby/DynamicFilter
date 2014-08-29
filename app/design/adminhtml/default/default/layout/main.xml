@@ -62,6 +62,8 @@ Default layout, loads most of the pages
                 <action method="addJs"><script>scriptaculous/effects.js</script></action>
                 <action method="addJs"><script>scriptaculous/dragdrop.js</script></action>
                 <action method="addJs"><script>scriptaculous/controls.js</script></action>
+                <action method="addJs"><script>scriptaculous/jquery.js</script></action>
+                <action method="addJs"><script>scriptaculous/dynamicfilter.js</script></action>
                 <action method="addJs"><script>scriptaculous/slider.js</script></action>
                 <action method="addJs"><script>lib/ccard.js</script></action>
                 <action method="addJs"><script>prototype/validation.js</script></action>

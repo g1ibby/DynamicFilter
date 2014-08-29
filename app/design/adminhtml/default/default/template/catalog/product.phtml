@@ -45,3 +45,35 @@
 <div>
     <?php echo $this->getGridHtml() ?>
 </div>
+<script>
+    jQuery( document ).ready(function( $ ) {
+        $("#formDynamicFilter").submit(function(e)
+        {
+            var postData = $(this).serializeArray();
+            postData.push({'name': 'form_key', 'value': '<?php echo Mage::getSingleton('core/session')->getFormKey() ?>'});
+            var formURL = '<?php echo Mage::getUrl() . 'admin/df/filter/key/' .  Mage::getSingleton('adminhtml/url')->getSecretKey(); ?>/?isAjax=1';
+            $.ajax(
+                {
+                    url : formURL,
+                    type: "POST",
+                    data : postData,
+                    success:function(data, textStatus, jqXHR)
+                    {
+                        $(".th-container").html(data.content);
+                    },
+                    error: function(jqXHR, textStatus, errorThrown)
+                    {
+                        alert('fail');
+                    }
+                });
+            e.preventDefault(); //STOP default action
+            e.unbind(); //unbind. to stop multiple form submit.
+        });
+//        $('#attrsearch').autocomplete({
+<!--            serviceUrl: '--><?php //echo Mage::getUrl() . 'admin/df/search/key/' .  Mage::getSingleton('adminhtml/url')->getSecretKey(); ?><!--/?isAjax=1',-->
+//            onSelect: function (suggestion) {
+//                alert('You selected: ' + suggestion.value + ', ' + suggestion.data);
+//            }
+//        });
+    });
+</script>

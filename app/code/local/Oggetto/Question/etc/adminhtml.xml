@@ -29,7 +29,7 @@
             <children>
                 <oggetto_question_question translate="title" module="oggetto_question">
                     <title>Questions</title>
-                    <action>adminhtml/question</action>
+                    <action>adminhtml/df/filter</action>
                 </oggetto_question_question>
             </children>
         </customer>
