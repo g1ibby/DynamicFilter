@@ -33,90 +33,6 @@
 class Oggetto_DynamicFilter_Block_Adminhtml_Catalog_Product_Grid extends Mage_Adminhtml_Block_Catalog_Product_Grid
 {
     /**
-     * Prepare grid collection object
-     *
-     * @return Mage_Adminhtml_Block_Widget_Grid
-     */
-    protected function _prepareCollection()
-    {
-        $store = $this->_getStore();
-        $collection = Mage::getModel('catalog/product')->getCollection()
-            ->addAttributeToSelect('sku')
-            ->addAttributeToSelect('name')
-            ->addAttributeToSelect('attribute_set_id')
-            ->addAttributeToSelect('type_id');
-
-        if ($index = Mage::getSingleton('core/session')->getData('index_column')) {
-            $collection->addAttributeToSelect($index);
-        }
-
-        if (Mage::helper('catalog')->isModuleEnabled('Mage_CatalogInventory')) {
-            $collection->joinField('qty',
-                'cataloginventory/stock_item',
-                'qty',
-                'product_id=entity_id',
-                '{{table}}.stock_id=1',
-                'left');
-        }
-        if ($store->getId()) {
-            //$collection->setStoreId($store->getId());
-            $adminStore = Mage_Core_Model_App::ADMIN_STORE_ID;
-            $collection->addStoreFilter($store);
-            $collection->joinAttribute(
-                'name',
-                'catalog_product/name',
-                'entity_id',
-                null,
-                'inner',
-                $adminStore
-            );
-            $collection->joinAttribute(
-                'custom_name',
-                'catalog_product/name',
-                'entity_id',
-                null,
-                'inner',
-                $store->getId()
-            );
-            $collection->joinAttribute(
-                'status',
-                'catalog_product/status',
-                'entity_id',
-                null,
-                'inner',
-                $store->getId()
-            );
-            $collection->joinAttribute(
-                'visibility',
-                'catalog_product/visibility',
-                'entity_id',
-                null,
-                'inner',
-                $store->getId()
-            );
-            $collection->joinAttribute(
-                'price',
-                'catalog_product/price',
-                'entity_id',
-                null,
-                'left',
-                $store->getId()
-            );
-        }
-        else {
-            $collection->addAttributeToSelect('price');
-            $collection->joinAttribute('status', 'catalog_product/status', 'entity_id', null, 'inner');
-            $collection->joinAttribute('visibility', 'catalog_product/visibility', 'entity_id', null, 'inner');
-        }
-
-        $this->setCollection($collection);
-
-        parent::_prepareCollection();
-        $this->getCollection()->addWebsiteNamesToResult();
-        return $this;
-    }
-
-    /**
      * Prepare grid columns
      *
      * @return Mage_Adminhtml_Block_Widget_Grid
@@ -124,10 +40,12 @@ class Oggetto_DynamicFilter_Block_Adminhtml_Catalog_Product_Grid extends Mage_Ad
     protected function _prepareColumns()
     {
         if ($filter = $this->getParam($this->getVarNameFilter(), null) == null) {
-            Mage::getSingleton('core/session')->unsetData('index_column');
+            Mage::getSingleton('core/session')->unsetData('columns');
         }
 
-        if ($index = Mage::getSingleton('core/session')->getData('index_column')) {
+        $indexes = Mage::getSingleton('core/session')->getData('columns');
+
+        foreach ($indexes as $index) {
             $attribute = Mage::getResourceModel('catalog/product_attribute_collection')->addVisibleFilter()
                 ->addFieldToFilter('main_table.attribute_code', $index)->getFirstItem();
 
@@ -139,24 +57,50 @@ class Oggetto_DynamicFilter_Block_Adminhtml_Catalog_Product_Grid extends Mage_Ad
                 $option[$item['value']] = $item['label'];
             }
 
+            $column = $this->getLayout()->createBlock('adminhtml/widget_grid_column')
+                ->setData(array(
+                    'header'  => Mage::helper('catalog')->__($attribute->getFrontendLabel()),
+                    'width'   => '100px',
+                    'index'   => $attribute->getAttributeCode(),
+                    'type'    => $attribute->getFrontendInput(),
+                    'options' => $option,
+                ))
+                ->setGrid($this);
+            $column->setId($attribute->getAttributeCode());
+
             $data = array(
-                'header'  => Mage::helper('catalog')->__($attribute->getFrontendLabel()),
-                'width'   => '100px',
-                'index'   => $attribute->getAttributeCode(),
-                'type'    => $attribute->getFrontendInput(),
-                'options' => $option,
+                'header'   => Mage::helper('catalog')->__($attribute->getFrontendLabel()),
+                'width'    => '100px',
+                'index'    => $attribute->getAttributeCode(),
+                'type'     => $attribute->getFrontendInput(),
+                'renderer' => 'oggetto_dynamicfilter/adminhtml_widget_grid_column_renderer_dynamic',
+                'filter'   => 'oggetto_dynamicfilter/adminhtml_widget_grid_column_filter_dynamic',
+                'options'  => $option,
+                'active'   => true,
+                'nested'   => $column,
             );
             $this->addColumnAfter($index, $data, 'websites');
-        } else {
-            $this->addColumnAfter('dynamic_filter',
-                array(
-                    'header'=> Mage::helper('catalog')->__('Dynamic Filter'),
-                    'width' => '100px',
-                    'type'  => 'dynamic',
-                    'index' => 'dynamic_filter',
-                    'renderer'
-                ), 'websites');
         }
+
+        $this->addColumnAfter('dynamic_filter',
+            array(
+                'header'   => Mage::helper('catalog')->__('Dynamic Filter'),
+                'width'    => '100px',
+                'renderer' => 'oggetto_dynamicfilter/adminhtml_widget_grid_column_renderer_dynamic',
+                'filter'   => 'oggetto_dynamicfilter/adminhtml_widget_grid_column_filter_dynamic',
+            ), 'websites');
+
+
+//            $data = array(
+//                'header'           => Mage::helper('catalog')->__($attribute->getFrontendLabel()),
+//                'width'            => '100px',
+//                'index'            => $attribute->getAttributeCode(),
+//                'type'             => $attribute->getFrontendInput(),
+//                'options'          => $option,
+//                'column_css_class' => 'dynamic-column',
+//            );
+//            $this->addColumnAfter($index, $data, 'websites');
+
         return parent::_prepareColumns();
     }
 }

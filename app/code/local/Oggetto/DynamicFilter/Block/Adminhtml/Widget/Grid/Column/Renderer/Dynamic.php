@@ -42,7 +42,13 @@ class Oggetto_DynamicFilter_Block_Adminhtml_Widget_Grid_Column_Renderer_Dynamic
      */
     public function renderHeader()
     {
-        $out = $this->getColumn()->getHeader();
+        if ($this->getColumn()->getData('active')) {
+            $out  = $this->getColumn()->getData('nested')->getRenderer()->renderHeader();
+            $out .= '<a href="#" class="delete-filter">X</a>';
+            $out .= '<a href="#" class="edit-filter">E</a>';
+        } else {
+            $out = '<input name="dynamic_filter" class="attrsearch" placeholder="Dynamic filter"/>';
+        }
         return $out;
     }
 
@@ -54,6 +60,10 @@ class Oggetto_DynamicFilter_Block_Adminhtml_Widget_Grid_Column_Renderer_Dynamic
      */
     public function render(Varien_Object $row)
     {
-        return '';
+        if ($this->getColumn()->getData('active')) {
+            return $this->getColumn()->getData('nested')->getRenderer()->render($row);
+        } else {
+            return '';
+        }
     }
 }

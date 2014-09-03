@@ -102,9 +102,6 @@ class Oggetto_DynamicFilter_Block_Adminhtml_Widget_Grid_Column extends Mage_Admi
             case 'theme':
                 $rendererClass = 'adminhtml/widget_grid_column_renderer_theme';
                 break;
-            case 'dynamic':
-                $rendererClass = 'oggetto_dynamicfilter/adminhtml_widget_grid_column_renderer_dynamic';
-                break;
             default:
                 $rendererClass = 'adminhtml/widget_grid_column_renderer_text';
                 break;
@@ -164,9 +161,6 @@ class Oggetto_DynamicFilter_Block_Adminhtml_Widget_Grid_Column extends Mage_Admi
                 break;
             case 'theme':
                 $filterClass = 'adminhtml/widget_grid_column_filter_theme';
-                break;
-            case 'dynamic':
-                $filterClass = 'oggetto_dynamicfilter/adminhtml_widget_grid_column_filter_dynamic';
                 break;
             default:
                 $filterClass = 'adminhtml/widget_grid_column_filter_text';

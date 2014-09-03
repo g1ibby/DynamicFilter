@@ -42,7 +42,11 @@ class Oggetto_DynamicFilter_Block_Adminhtml_Widget_Grid_Column_Filter_Dynamic
      */
     public function getHtml()
     {
-        $out = '<input name="dynamic_filter" id="attrsearch"/>';
+        if ($this->getColumn()->getData('active')) {
+            $out = $this->getColumn()->getData('nested')->getFilter()->getHtml();
+        } else {
+            $out = '';
+        }
         return $out;
     }
 }

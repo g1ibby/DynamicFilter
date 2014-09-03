@@ -42,9 +42,8 @@ class Oggetto_DynamicFilter_Adminhtml_DfController extends Mage_Adminhtml_Contro
         $response = Mage::getModel('ajax/response');
         $search = $this->getRequest()->getParam('dynamic_filter');
         $attributes = Mage::getResourceModel('catalog/product_attribute_collection')->addVisibleFilter()
-            ->addFieldToFilter('main_table.attribute_code', array('like' => "%$search%"))->getItems();
+            ->addFieldToFilter('main_table.attribute_code', array('like' => "%$search%"));
         $attribData = $attributes->getColumnValues('attribute_code');
-
 
         $response->success()->setQuery($search)
             ->setSuggestions($attribData);
@@ -61,7 +60,25 @@ class Oggetto_DynamicFilter_Adminhtml_DfController extends Mage_Adminhtml_Contro
         $response = Mage::getModel('ajax/response');
 
         if ($attributeId = $this->getRequest()->getPost('dynamic_filter')) {
-            Mage::getSingleton('core/session')->setData('index_column', $attributeId);
+            $indexes = Mage::getSingleton('core/session')->getData('columns');
+            $indexes[] = $attributeId;
+            if ($previousValue = $this->getRequest()->getPost('previous_value')) {
+                $indexes = array_diff($indexes, [$previousValue]);
+            }
+            Mage::getSingleton('core/session')->setData('columns', $indexes);
+        }
+        $response->success();
+        Mage::helper('ajax')->sendResponse($response);
+        return;
+    }
+
+    public function deleteAction()
+    {
+        $response = Mage::getModel('ajax/response');
+
+        if ($attributeId = $this->getRequest()->getPost('dynamic_filter')) {
+            $indexes = Mage::getSingleton('core/session')->getData('columns');
+            Mage::getSingleton('core/session')->setData('columns', array_diff($indexes, [$attributeId]));
         }
         $response->success();
         Mage::helper('ajax')->sendResponse($response);

@@ -47,21 +47,9 @@
 </div>
 <script>
     jQuery( document ).ready(function( $ ) {
-<!--        $("#attrsearch").onEnter( function() {-->
-<!--            var formURL = '--><?php //echo Mage::getUrl() . 'admin/df/filter/key/' .  Mage::getSingleton('adminhtml/url')->getSecretKey(); ?><!--/?isAjax=1';-->
-<!--            $.ajax(-->
-<!--                {-->
-<!--                    url : formURL,-->
-<!--                    type: "POST",-->
-<!--                    data : 'dynamic_filter=' + $(this).val() + '&form_key=' + --><?php //echo Mage::getSingleton('core/session')->getFormKey() ?><!--,-->
-<!--                    success:function(data, textStatus, jqXHR)-->
-<!--                    {-->
-<!--                        productGridJsObject.doFilter()-->
-<!--                    }-->
-<!--                });-->
-<!--        });-->
+        var pastValue = '';
 
-        var ac = $('#attrsearch').autocomplete({
+        var ac = $('.attrsearch').autocomplete({
             serviceUrl: '<?php echo Mage::getUrl() . 'admin/df/search/key/' .  Mage::getSingleton('adminhtml/url')->getSecretKey(); ?>/?isAjax=1',
             minChars: 2,
             maxHeight: 400,
@@ -77,13 +65,38 @@
                     {
                         url : formURL,
                         type: "POST",
-                        data : 'dynamic_filter=' + value.value + '&form_key=' + '<?php echo Mage::getSingleton('core/session')->getFormKey() ?>',
+                        data : 'dynamic_filter=' + value.value + '&form_key=' + '<?php echo Mage::getSingleton('core/session')->getFormKey() ?>&previous_value=' + value.previous_value,
                         success:function(data, textStatus, jqXHR)
                         {
                             productGridJsObject.doFilter()
                         }
                     });
             }
+        });
+
+        $('body .edit-filter').on('click', function(e) {
+            console.log('edit');
+            var parent = $(this).parent('span');
+            var filter = $($(parent).children('a')[0]).attr('name');
+            console.log(filter);
+            $(parent).html('<input name="dynamic_filter" class="attrsearch" placeholder="Dynamic filter" previous_value="' + filter + '"/>');
+        });
+
+        $('body .delete-filter').on('click', function(e) {
+            console.log('delete');
+            var parent = $(this).parent('span');
+            var filter = $($(parent).children('a')[0]).attr('name');
+            var formURL = '<?php echo Mage::getUrl() . 'admin/df/delete/key/' .  Mage::getSingleton('adminhtml/url')->getSecretKey(); ?>/?isAjax=1';
+            $.ajax(
+                {
+                    url :    formURL,
+                    type:    "POST",
+                    data :   'dynamic_filter=' + filter + '&form_key=' + '<?php echo Mage::getSingleton('core/session')->getFormKey() ?>',
+                    success: function(data, textStatus, jqXHR)
+                    {
+                        productGridJsObject.doFilter()
+                    }
+                });
         });
     });
 </script>
