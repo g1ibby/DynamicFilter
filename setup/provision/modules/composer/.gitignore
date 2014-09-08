@@ -1,8 +1,0 @@
-spec/fixtures/modules/*
-.bundle/
-vendor/
-Gemfile.lock
-pkg/
-modules/
-
-.vagrant

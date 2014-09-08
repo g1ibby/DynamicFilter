@@ -1,1 +1,0 @@
-../vendor/ecomdev/ecomdev_phpunit/shell/ecomdev-phpunit.php

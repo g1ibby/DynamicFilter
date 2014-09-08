@@ -1,8 +1,0 @@
----
-:backends:
-  - yaml
-:yaml:
-  :datadir: setup/provision/hiera
-:hierarchy:
-  - "node/%{::fqdn}"
-  - common
