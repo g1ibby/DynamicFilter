@@ -41,12 +41,10 @@ class Oggetto_DynamicFilter_Adminhtml_DfController extends Mage_Adminhtml_Contro
     {
         $response = Mage::getModel('ajax/response');
         $search = $this->getRequest()->getParam('dynamic_filter');
-        $attributes = Mage::getResourceModel('catalog/product_attribute_collection')->addVisibleFilter()
-            ->addFieldToFilter('main_table.attribute_code', array('like' => "%$search%"));
-        $attribData = $attributes->getColumnValues('attribute_code');
+        $attributes = Mage::getModel('oggetto_dynamicfilter/attribute')->searchCode($search);
 
         $response->success()->setQuery($search)
-            ->setSuggestions($attribData);
+            ->setSuggestions($attributes);
         Mage::helper('ajax')->sendResponse($response);
     }
 
@@ -60,18 +58,26 @@ class Oggetto_DynamicFilter_Adminhtml_DfController extends Mage_Adminhtml_Contro
         $response = Mage::getModel('ajax/response');
 
         if ($attributeId = $this->getRequest()->getPost('dynamic_filter')) {
-            $indexes = Mage::getSingleton('core/session')->getData('columns');
-            $indexes[] = $attributeId;
-            if ($previousValue = $this->getRequest()->getPost('previous_value')) {
-                $indexes = array_diff($indexes, [$previousValue]);
+            $indexes = Mage::helper('oggetto_dynamicfilter')->getColumns();
+            if (Mage::helper('oggetto_dynamicfilter')->checkAttribute($indexes, $attributeId)) {
+                if (($key = array_search($this->getRequest()->getPost('previous_value'), $indexes)) !== false) {
+                    $indexes[$key] = $attributeId;
+                } else {
+                    $indexes[] = $attributeId;
+                }
+                Mage::getSingleton('core/session')->setData('columns', $indexes);
             }
-            Mage::getSingleton('core/session')->setData('columns', $indexes);
         }
         $response->success();
         Mage::helper('ajax')->sendResponse($response);
         return;
     }
 
+    /**
+     * Delete column
+     *
+     * @return void
+     */
     public function deleteAction()
     {
         $response = Mage::getModel('ajax/response');

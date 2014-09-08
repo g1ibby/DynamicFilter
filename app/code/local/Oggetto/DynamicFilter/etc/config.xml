@@ -52,24 +52,34 @@
     <adminhtml>
         <layout>
             <updates>
-                <oggetto_question>
+                <oggetto_dynamicfilter>
                     <file>oggetto_dynamicfilter.xml</file>
-                </oggetto_question>
+                </oggetto_dynamicfilter>
             </updates>
         </layout>
     </adminhtml>
 
     <global>
+        <helpers>
+            <oggetto_dynamicfilter>
+                <class>Oggetto_DynamicFilter_Helper</class>
+            </oggetto_dynamicfilter>
+        </helpers>
         <blocks>
             <adminhtml>
                 <rewrite>
                     <catalog_product_grid>Oggetto_DynamicFilter_Block_Adminhtml_Catalog_Product_Grid</catalog_product_grid>
-                    <widget_grid_column>Oggetto_DynamicFilter_Block_Adminhtml_Widget_Grid_Column</widget_grid_column>
                 </rewrite>
             </adminhtml>
             <oggetto_dynamicfilter>
                 <class>Oggetto_DynamicFilter_Block</class>
             </oggetto_dynamicfilter>
         </blocks>
+
+        <models>
+            <oggetto_dynamicfilter>
+                <class>Oggetto_DynamicFilter_Model</class>
+            </oggetto_dynamicfilter>
+        </models>
     </global>
 </config>

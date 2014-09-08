@@ -44,10 +44,10 @@ class Oggetto_DynamicFilter_Block_Adminhtml_Widget_Grid_Column_Renderer_Dynamic
     {
         if ($this->getColumn()->getData('active')) {
             $out  = $this->getColumn()->getData('nested')->getRenderer()->renderHeader();
-            $out .= '<a href="#" class="delete-filter">X</a>';
-            $out .= '<a href="#" class="edit-filter">E</a>';
+            $out .= '<img class="delete-filter" src="/skin/adminhtml/default/default/images/rule_component_remove.gif" style="text-align: left; display: inline; margin-right: 7px; cursor: pointer; margin-bottom: 2px;">';
+            $out .= '<img class="edit-filter" src="/skin/adminhtml/default/default/images/fam_page_white_edit.gif" style="text-align: left; display: inline; cursor: pointer;">';
         } else {
-            $out = '<input name="dynamic_filter" class="attrsearch" placeholder="Dynamic filter"/>';
+            $out = '<input name="dynamic_filter" class="attrsearch" placeholder="Dynamic filter" type="text" />';
         }
         return $out;
     }
