@@ -26,6 +26,7 @@ var varienGrid = new Class.create();
 
 varienGrid.prototype = {
     initialize : function(containerId, url, pageVar, sortVar, dirVar, filterVar){
+        console.log(url);
         this.containerId = containerId;
         this.url = url;
         this.pageVar = pageVar || false;
